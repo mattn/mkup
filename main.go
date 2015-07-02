@@ -16,6 +16,7 @@ import (
 
 const (
 	template = `
+<title>%s</title>
 <link rel="stylesheet" href="/_assets/sanitize.css" media="all">
 <link rel="stylesheet" href="/_assets/github-markdown.css" media="all">
 <link rel="stylesheet" href="/_assets/sons-of-obsidian.css" media="all">
@@ -68,7 +69,7 @@ func main() {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		renderer := blackfriday.HtmlRenderer(0, "", "")
 		b = blackfriday.Markdown(b, renderer, extensions)
-		w.Write([]byte(fmt.Sprintf(template, string(b))))
+		w.Write([]byte(fmt.Sprintf(template, name, string(b))))
 	})
 	fmt.Fprintln(os.Stderr, "Lisning at "+*addr)
 	http.ListenAndServe(*addr, httpLogger.WriteLog(http.DefaultServeMux, nil))
