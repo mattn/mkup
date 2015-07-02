@@ -16,6 +16,10 @@ import (
 
 const (
 	template = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
 <title>%s</title>
 <link rel="stylesheet" href="/_assets/sanitize.css" media="all">
 <link rel="stylesheet" href="/_assets/github-markdown.css" media="all">
@@ -24,7 +28,11 @@ const (
 <script src="/_assets/jquery-2.1.1.min.js"></script>
 <script src="/_assets/prettify.min.js"></script>
 <script>$(function() { $('pre>code').each(function() { $(this.parentNode).addClass('prettyprint') }); prettyPrint(); });</script>
+</head>
+<body>
 <div class="markdown-body">%s</div>
+</body>
+</html>
 `
 	extensions = blackfriday.EXTENSION_NO_INTRA_EMPHASIS |
 		blackfriday.EXTENSION_TABLES |
@@ -45,8 +53,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Path
 		if strings.HasPrefix(name, "/_assets/") {
-			name = name[1:]
-			b, err := Asset(name)
+			b, err := Asset(name[1:])
 			if err != nil {
 				http.Error(w, err.Error(), 404)
 				return
