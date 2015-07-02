@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"mime"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ajays20078/go-http-logger"
 	"github.com/russross/blackfriday"
 )
 
@@ -31,7 +33,10 @@ const (
 		blackfriday.EXTENSION_SPACE_HEADERS
 )
 
+var addr = flag.String("http", ":8000", "HTTP service address (e.g., ':8000')")
+
 func main() {
+	flag.Parse()
 	cwd, _ := os.Getwd()
 	fs := http.FileServer(http.Dir(cwd))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -63,5 +68,5 @@ func main() {
 		w.Write([]byte(fmt.Sprintf(template, string(b))))
 		//w.Write(blackfriday.MarkdownCommon(b))
 	})
-	http.ListenAndServe(":8000", nil)
+	http.ListenAndServe(*addr, httpLogger.WriteLog(http.DefaultServeMux, nil))
 }
