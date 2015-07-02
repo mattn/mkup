@@ -33,7 +33,9 @@ const (
 		blackfriday.EXTENSION_SPACE_HEADERS
 )
 
-var addr = flag.String("http", ":8000", "HTTP service address (e.g., ':8000')")
+var (
+	addr = flag.String("http", ":8000", "HTTP service address (e.g., ':8000')")
+)
 
 func main() {
 	flag.Parse()
@@ -53,7 +55,8 @@ func main() {
 			w.Write(b)
 			return
 		}
-		if filepath.Ext(name) != ".md" {
+		ext := filepath.Ext(name)
+		if ext != ".md" && ext != ".mkd" && ext != ".markdown" {
 			fs.ServeHTTP(w, r)
 			return
 		}
@@ -66,7 +69,6 @@ func main() {
 		renderer := blackfriday.HtmlRenderer(0, "", "")
 		b = blackfriday.Markdown(b, renderer, extensions)
 		w.Write([]byte(fmt.Sprintf(template, string(b))))
-		//w.Write(blackfriday.MarkdownCommon(b))
 	})
 	fmt.Fprintln(os.Stderr, "Lisning at "+*addr)
 	http.ListenAndServe(*addr, httpLogger.WriteLog(http.DefaultServeMux, nil))
