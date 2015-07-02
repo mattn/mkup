@@ -68,5 +68,6 @@ func main() {
 		w.Write([]byte(fmt.Sprintf(template, string(b))))
 		//w.Write(blackfriday.MarkdownCommon(b))
 	})
+	fmt.Fprintln(os.Stderr, "Lisning at "+*addr)
 	http.ListenAndServe(*addr, httpLogger.WriteLog(http.DefaultServeMux, nil))
 }
