@@ -18,11 +18,11 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"strings"
+	"os"
 	"time"
+	"io/ioutil"
+	"path/filepath"
 )
 
 func bindataRead(data []byte, name string) ([]byte, error) {
@@ -308,15 +308,15 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"_assets/github-markdown.css":  _assetsGithubMarkdownCss,
-	"_assets/github.css":           _assetsGithubCss,
-	"_assets/jquery-2.1.1.min.js":  _assetsJquery211MinJs,
-	"_assets/livereload.js":        _assetsLivereloadJs,
-	"_assets/prettify.min.css":     _assetsPrettifyMinCss,
-	"_assets/prettify.min.js":      _assetsPrettifyMinJs,
-	"_assets/sanitize.css":         _assetsSanitizeCss,
+	"_assets/github-markdown.css": _assetsGithubMarkdownCss,
+	"_assets/github.css": _assetsGithubCss,
+	"_assets/jquery-2.1.1.min.js": _assetsJquery211MinJs,
+	"_assets/livereload.js": _assetsLivereloadJs,
+	"_assets/prettify.min.css": _assetsPrettifyMinCss,
+	"_assets/prettify.min.js": _assetsPrettifyMinJs,
+	"_assets/sanitize.css": _assetsSanitizeCss,
 	"_assets/sons-of-obsidian.css": _assetsSonsOfObsidianCss,
-	"_assets/style.css":            _assetsStyleCss,
+	"_assets/style.css": _assetsStyleCss,
 }
 
 // AssetDir returns the file names below a certain
@@ -355,67 +355,76 @@ func AssetDir(name string) ([]string, error) {
 }
 
 type bintree struct {
-	Func     func() (*asset, error)
+	Func func() (*asset, error)
 	Children map[string]*bintree
 }
-
 var _bintree = &bintree{nil, map[string]*bintree{
 	"_assets": &bintree{nil, map[string]*bintree{
-		"github-markdown.css":  &bintree{_assetsGithubMarkdownCss, map[string]*bintree{}},
-		"github.css":           &bintree{_assetsGithubCss, map[string]*bintree{}},
-		"jquery-2.1.1.min.js":  &bintree{_assetsJquery211MinJs, map[string]*bintree{}},
-		"livereload.js":        &bintree{_assetsLivereloadJs, map[string]*bintree{}},
-		"prettify.min.css":     &bintree{_assetsPrettifyMinCss, map[string]*bintree{}},
-		"prettify.min.js":      &bintree{_assetsPrettifyMinJs, map[string]*bintree{}},
-		"sanitize.css":         &bintree{_assetsSanitizeCss, map[string]*bintree{}},
-		"sons-of-obsidian.css": &bintree{_assetsSonsOfObsidianCss, map[string]*bintree{}},
-		"style.css":            &bintree{_assetsStyleCss, map[string]*bintree{}},
+		"github-markdown.css": &bintree{_assetsGithubMarkdownCss, map[string]*bintree{
+		}},
+		"github.css": &bintree{_assetsGithubCss, map[string]*bintree{
+		}},
+		"jquery-2.1.1.min.js": &bintree{_assetsJquery211MinJs, map[string]*bintree{
+		}},
+		"livereload.js": &bintree{_assetsLivereloadJs, map[string]*bintree{
+		}},
+		"prettify.min.css": &bintree{_assetsPrettifyMinCss, map[string]*bintree{
+		}},
+		"prettify.min.js": &bintree{_assetsPrettifyMinJs, map[string]*bintree{
+		}},
+		"sanitize.css": &bintree{_assetsSanitizeCss, map[string]*bintree{
+		}},
+		"sons-of-obsidian.css": &bintree{_assetsSonsOfObsidianCss, map[string]*bintree{
+		}},
+		"style.css": &bintree{_assetsStyleCss, map[string]*bintree{
+		}},
 	}},
 }}
 
 // RestoreAsset restores an asset under the given directory
 func RestoreAsset(dir, name string) error {
-	data, err := Asset(name)
-	if err != nil {
-		return err
-	}
-	info, err := AssetInfo(name)
-	if err != nil {
-		return err
-	}
-	err = os.MkdirAll(_filePath(dir, filepath.Dir(name)), os.FileMode(0755))
-	if err != nil {
-		return err
-	}
-	err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
-	if err != nil {
-		return err
-	}
-	err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
-	if err != nil {
-		return err
-	}
-	return nil
+        data, err := Asset(name)
+        if err != nil {
+                return err
+        }
+        info, err := AssetInfo(name)
+        if err != nil {
+                return err
+        }
+        err = os.MkdirAll(_filePath(dir, filepath.Dir(name)), os.FileMode(0755))
+        if err != nil {
+                return err
+        }
+        err = ioutil.WriteFile(_filePath(dir, name), data, info.Mode())
+        if err != nil {
+                return err
+        }
+        err = os.Chtimes(_filePath(dir, name), info.ModTime(), info.ModTime())
+        if err != nil {
+                return err
+        }
+        return nil
 }
 
 // RestoreAssets restores an asset under the given directory recursively
 func RestoreAssets(dir, name string) error {
-	children, err := AssetDir(name)
-	// File
-	if err != nil {
-		return RestoreAsset(dir, name)
-	}
-	// Dir
-	for _, child := range children {
-		err = RestoreAssets(dir, filepath.Join(name, child))
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+        children, err := AssetDir(name)
+        // File
+        if err != nil {
+                return RestoreAsset(dir, name)
+        }
+        // Dir
+        for _, child := range children {
+                err = RestoreAssets(dir, filepath.Join(name, child))
+                if err != nil {
+                        return err
+                }
+        }
+        return nil
 }
 
 func _filePath(dir, name string) string {
-	cannonicalName := strings.Replace(name, "\\", "/", -1)
-	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
+        cannonicalName := strings.Replace(name, "\\", "/", -1)
+        return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
+
