@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"gopkg.in/fsnotify.v1"
 	"io/ioutil"
 	"log"
 	"mime"
@@ -11,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/omeid/livereload"
 	"github.com/russross/blackfriday"
 )
 
@@ -27,7 +29,12 @@ const (
 <link rel="stylesheet" href="/_assets/style.css" media="all">
 <script src="/_assets/jquery-2.1.1.min.js"></script>
 <script src="/_assets/prettify.min.js"></script>
-<script>$(function() { $('pre>code').each(function() { $(this.parentNode).addClass('prettyprint') }); prettyPrint(); });</script>
+<script>
+$(function() {
+	$('pre>code').each(function() { $(this.parentNode).addClass('prettyprint') }); prettyPrint();
+	$.getScript(window.location.protocol + '//' + window.location.hostname + ':35729/livereload.js');
+});
+</script>
 </head>
 <body>
 <div class="markdown-body">%s</div>
@@ -49,6 +56,60 @@ var (
 func main() {
 	flag.Parse()
 	cwd, _ := os.Getwd()
+
+	lrs := livereload.New("mkup")
+	defer lrs.Close()
+
+	go func() {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/livereload.js", func(w http.ResponseWriter, r *http.Request) {
+			b, err := Asset("_assets/livereload.js")
+			if err != nil {
+				http.Error(w, "404 page not found", 404)
+				return
+			}
+			w.Header().Set("Content-Type", "application/javascript")
+			w.Write(b)
+			return
+		})
+		mux.Handle("/", lrs)
+		log.Fatal(http.ListenAndServe(":35729", mux))
+	}()
+
+	fsw, err := fsnotify.NewWatcher()
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		fsw.Add(cwd)
+		err = filepath.Walk(cwd, func(path string, info os.FileInfo, err error) error {
+			if info == nil {
+				return err
+			}
+			if !info.IsDir() {
+				return nil
+			}
+			fsw.Add(path)
+			return nil
+		})
+
+		for {
+			select {
+			case event := <-fsw.Events:
+				if path, err := filepath.Rel(cwd, event.Name); err == nil {
+					path = "/" + filepath.ToSlash(path)
+					log.Println("reload", path)
+					lrs.Reload(path, true)
+				}
+			case err := <-fsw.Errors:
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
+	}()
+
 	fs := http.FileServer(http.Dir(cwd))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Path
@@ -92,5 +153,5 @@ func main() {
 			http.DefaultServeMux.ServeHTTP(w, r)
 		}),
 	}
-	server.ListenAndServe()
+	log.Fatal(server.ListenAndServe())
 }
