@@ -55,7 +55,7 @@ func main() {
 		if strings.HasPrefix(name, "/_assets/") {
 			b, err := Asset(name[1:])
 			if err != nil {
-				http.Error(w, err.Error(), 404)
+				http.Error(w, "404 page not found", 404)
 				return
 			}
 
@@ -70,7 +70,11 @@ func main() {
 		}
 		b, err := ioutil.ReadFile(filepath.Join(cwd, name))
 		if err != nil {
-			http.Error(w, err.Error(), 403)
+			if os.IsNotExist(err) {
+				http.Error(w, "404 page not found", 404)
+				return
+			}
+			http.Error(w, err.Error(), 500)
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
