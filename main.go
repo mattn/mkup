@@ -4,13 +4,13 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/ajays20078/go-http-logger"
 	"github.com/russross/blackfriday"
 )
 
@@ -78,6 +78,15 @@ func main() {
 		b = blackfriday.Markdown(b, renderer, extensions)
 		w.Write([]byte(fmt.Sprintf(template, name, string(b))))
 	})
+
 	fmt.Fprintln(os.Stderr, "Lisning at "+*addr)
-	http.ListenAndServe(*addr, httpLogger.WriteLog(http.DefaultServeMux, nil))
+
+	server := &http.Server{
+		Addr: *addr,
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.RequestURI())
+			http.DefaultServeMux.ServeHTTP(w, r)
+		}),
+	}
+	server.ListenAndServe()
 }
