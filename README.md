@@ -1,6 +1,6 @@
 # mkup
 
-Portable Markdown Previweer
+Portable Markdown Previewer
 
 ## Usage
 ```
