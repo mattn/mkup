@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/omeid/livereload"
@@ -54,6 +55,7 @@ var (
 )
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	flag.Parse()
 	cwd, _ := os.Getwd()
 
@@ -144,8 +146,6 @@ func main() {
 		w.Write([]byte(fmt.Sprintf(template, name, string(b))))
 	})
 
-	fmt.Fprintln(os.Stderr, "Lisning at "+*addr)
-
 	server := &http.Server{
 		Addr: *addr,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -153,5 +153,7 @@ func main() {
 			http.DefaultServeMux.ServeHTTP(w, r)
 		}),
 	}
+
+	fmt.Fprintln(os.Stderr, "Lisning at "+*addr)
 	log.Fatal(server.ListenAndServe())
 }
