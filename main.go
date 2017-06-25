@@ -154,6 +154,6 @@ func main() {
 		}),
 	}
 
-	fmt.Fprintln(os.Stderr, "Lisning at "+*addr)
+	fmt.Fprintln(os.Stderr, "Listening at "+*addr)
 	log.Fatal(server.ListenAndServe())
 }
