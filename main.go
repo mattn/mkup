@@ -1,9 +1,9 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"fmt"
-	"gopkg.in/fsnotify.v1"
 	"io/ioutil"
 	"log"
 	"mime"
@@ -13,9 +13,17 @@ import (
 	"runtime"
 	"strings"
 
+	"gopkg.in/fsnotify.v1"
+
 	"github.com/omeid/livereload"
-	"github.com/russross/blackfriday"
+	"github.com/russross/blackfriday/v2"
 )
+
+const name = "mkup"
+
+const version = "0.0.1"
+
+var revision = "HEAD"
 
 const (
 	template = `
@@ -42,17 +50,20 @@ $(function() {
 </body>
 </html>
 `
-	extensions = blackfriday.EXTENSION_NO_INTRA_EMPHASIS |
-		blackfriday.EXTENSION_TABLES |
-		blackfriday.EXTENSION_FENCED_CODE |
-		blackfriday.EXTENSION_AUTOLINK |
-		blackfriday.EXTENSION_STRIKETHROUGH |
-		blackfriday.EXTENSION_SPACE_HEADERS
+	extensions = blackfriday.NoIntraEmphasis |
+		blackfriday.Tables |
+		blackfriday.FencedCode |
+		blackfriday.Autolink |
+		blackfriday.Strikethrough |
+		blackfriday.SpaceHeadings
 )
 
 var (
 	addr = flag.String("http", ":8000", "HTTP service address (e.g., ':8000')")
 )
+
+//go:embed _assets
+var local embed.FS
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -65,7 +76,7 @@ func main() {
 	go func() {
 		mux := http.NewServeMux()
 		mux.HandleFunc("/livereload.js", func(w http.ResponseWriter, r *http.Request) {
-			b, err := Asset("_assets/livereload.js")
+			b, err := local.ReadFile("_assets/livereload.js")
 			if err != nil {
 				http.Error(w, "404 page not found", 404)
 				return
@@ -116,7 +127,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Path
 		if strings.HasPrefix(name, "/_assets/") {
-			b, err := Asset(name[1:])
+			b, err := local.ReadFile(name[1:])
 			if err != nil {
 				http.Error(w, "404 page not found", 404)
 				return
@@ -141,8 +152,12 @@ func main() {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		renderer := blackfriday.HtmlRenderer(0, "", "")
-		b = blackfriday.Markdown(b, renderer, extensions)
+		renderer := blackfriday.NewHTMLRenderer(blackfriday.HTMLRendererParameters{})
+		b = blackfriday.Run(
+			b,
+			blackfriday.WithRenderer(renderer),
+			blackfriday.WithExtensions(extensions),
+		)
 		w.Write([]byte(fmt.Sprintf(template, name, string(b))))
 	})
 
