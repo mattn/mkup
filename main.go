@@ -33,17 +33,14 @@ const (
 <meta charset="UTF-8">
 <title>%s</title>
 <link rel="stylesheet" href="/_assets/sanitize.css" media="all">
-<link rel="stylesheet" href="/_assets/github-markdown.css" media="all">
-<link rel="stylesheet" href="/_assets/sons-of-obsidian.css" media="all">
 <link rel="stylesheet" href="/_assets/style.css" media="all">
-<script src="/_assets/jquery-2.1.1.min.js"></script>
-<script src="/_assets/prettify.min.js"></script>
-<script>
-$(function() {
-	$('pre>code').each(function() { $(this.parentNode).addClass('prettyprint') }); prettyPrint();
-	$.getScript(window.location.protocol + '//' + window.location.hostname + ':35729/livereload.js');
-});
-</script>
+<link rel="stylesheet" href="/_assets/github-dark-dimmed.css" media="all">
+<script src="/_assets/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+<script>document.write('<script src="http://'
+    + (location.host || 'localhost').split(':')[0]
+    + ':35729/livereload.js?snipver=1"></'
+    + 'script>')</script>
 </head>
 <body>
 <div class="markdown-body">%s</div>

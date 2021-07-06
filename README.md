@@ -3,23 +3,20 @@
 Portable Markdown Previewer
 
 ## Usage
-```
+
+```shell
 $ mkup
 ```
 
 ## Installation
 
-```
+```shell
 $ go get github.com/mattn/mkup
 ```
 
-## TODO
-
-* auto-reload (livereload?)
-
 ## License
 
-http://mattn.mit-license.org/2015
+http://mattn.mit-license.org/2021
 
 ## Author
 
