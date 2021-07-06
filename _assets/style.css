@@ -1,6 +1,7 @@
 .markdown-body {
   margin: 2em;
 }
-.hljs {
-  padding: 2em;
+pre {
+  background-color: black;
+  padding: 1em;
 }
