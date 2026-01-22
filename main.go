@@ -4,7 +4,6 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"mime"
 	"net/http"
@@ -37,9 +36,10 @@ const (
 <link rel="stylesheet" href="/_assets/github-dark.css" media="all">
 <script src="/_assets/highlight.min.js"></script>
 <script>hljs.highlightAll();</script>
-<script>document.write('<script src="http://'
-    + (location.host || 'localhost').split(':')[0]
-    + ':35729/livereload.js?snipver=1"></'
+<script>document.write('<script src="'
+	+ location.protocol + '//'
+    + (location.host || 'localhost')
+    + '%s/_assets/livereload.js?snipver=1"></'
     + 'script>')</script>
 </head>
 <body>
@@ -56,7 +56,8 @@ const (
 )
 
 var (
-	addr = flag.String("http", ":8000", "HTTP service address (e.g., ':8000')")
+	addr        = flag.String("http", ":8000", "HTTP service address (e.g., ':8000')")
+	usehttpport = flag.Bool("usehttpport", false, "use livereload port with the same http port")
 )
 
 //go:embed _assets
@@ -66,25 +67,13 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	flag.Parse()
 	cwd, _ := os.Getwd()
+	livereloadPortAddr := ":35729"
+	if *usehttpport == true {
+		livereloadPortAddr = ""
+	}
 
 	lrs := livereload.New("mkup")
 	defer lrs.Close()
-
-	go func() {
-		mux := http.NewServeMux()
-		mux.HandleFunc("/livereload.js", func(w http.ResponseWriter, r *http.Request) {
-			b, err := local.ReadFile("_assets/livereload.js")
-			if err != nil {
-				http.Error(w, "404 page not found", 404)
-				return
-			}
-			w.Header().Set("Content-Type", "application/javascript")
-			w.Write(b)
-			return
-		})
-		mux.Handle("/", lrs)
-		log.Fatal(http.ListenAndServe(":35729", mux))
-	}()
 
 	fsw, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -139,7 +128,7 @@ func main() {
 			fs.ServeHTTP(w, r)
 			return
 		}
-		b, err := ioutil.ReadFile(filepath.Join(cwd, name))
+		b, err := os.ReadFile(filepath.Join(cwd, name))
 		if err != nil {
 			if os.IsNotExist(err) {
 				http.Error(w, "404 page not found", 404)
@@ -155,8 +144,13 @@ func main() {
 			blackfriday.WithRenderer(renderer),
 			blackfriday.WithExtensions(extensions),
 		)
-		w.Write([]byte(fmt.Sprintf(template, name, string(b))))
+		w.Write([]byte(fmt.Sprintf(template, name, livereloadPortAddr, string(b))))
 	})
+	http.Handle("/livereload",
+		http.HandlerFunc(
+			func(w http.ResponseWriter, r *http.Request) {
+				lrs.ServeHTTP(w, r)
+			}))
 
 	server := &http.Server{
 		Addr: *addr,
@@ -164,6 +158,20 @@ func main() {
 			log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.RequestURI())
 			http.DefaultServeMux.ServeHTTP(w, r)
 		}),
+	}
+
+	if livereloadPortAddr != "" {
+		go func() {
+			server := &http.Server{
+				Addr: livereloadPortAddr,
+				Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL.RequestURI())
+					http.DefaultServeMux.ServeHTTP(w, r)
+				}),
+			}
+			fmt.Fprintln(os.Stderr, "Listening at "+livereloadPortAddr)
+			server.ListenAndServe()
+		}()
 	}
 
 	fmt.Fprintln(os.Stderr, "Listening at "+*addr)

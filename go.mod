@@ -1,6 +1,8 @@
 module github.com/mattn/mkup
 
-go 1.17
+go 1.24.0
+
+toolchain go1.24.9
 
 require (
 	github.com/omeid/livereload v0.0.0-20180903043807-18d58b752b26
@@ -11,6 +13,6 @@ require (
 
 require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
+	golang.org/x/sys v0.39.0 // indirect
 )
