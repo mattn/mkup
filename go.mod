@@ -1,16 +1,11 @@
 module github.com/mattn/mkup
 
-go 1.17
+go 1.25.0
 
 require (
+	github.com/gofsnotify/fsnotify v0.0.2
 	github.com/omeid/livereload v0.0.0-20180903043807-18d58b752b26
-	github.com/russross/blackfriday v1.6.0
 	github.com/russross/blackfriday/v2 v2.1.0
-	gopkg.in/fsnotify.v1 v1.4.7
 )
 
-require (
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
-)
+require github.com/gorilla/websocket v1.5.3 // indirect

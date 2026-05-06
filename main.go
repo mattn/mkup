@@ -13,7 +13,7 @@ import (
 	"runtime"
 	"strings"
 
-	"gopkg.in/fsnotify.v1"
+	"github.com/gofsnotify/fsnotify"
 
 	"github.com/omeid/livereload"
 	"github.com/russross/blackfriday/v2"
@@ -92,7 +92,7 @@ func main() {
 	}
 
 	go func() {
-		fsw.Add(cwd)
+		fsw.Add(cwd, fsnotify.All)
 		err = filepath.Walk(cwd, func(path string, info os.FileInfo, err error) error {
 			if info == nil {
 				return err
@@ -100,7 +100,7 @@ func main() {
 			if !info.IsDir() {
 				return nil
 			}
-			fsw.Add(path)
+			fsw.Add(path, fsnotify.All)
 			return nil
 		})
 
