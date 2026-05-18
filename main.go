@@ -13,7 +13,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gofsnotify/fsnotify"
+	"github.com/fswatcher/fswatcher"
 
 	"github.com/omeid/livereload"
 	"github.com/russross/blackfriday/v2"
@@ -86,13 +86,13 @@ func main() {
 		log.Fatal(http.ListenAndServe(":35729", mux))
 	}()
 
-	fsw, err := fsnotify.NewWatcher()
+	fsw, err := fswatcher.NewWatcher()
 	if err != nil {
 		panic(err)
 	}
 
 	go func() {
-		fsw.Add(cwd, fsnotify.All)
+		fsw.Add(cwd, fswatcher.All)
 		err = filepath.Walk(cwd, func(path string, info os.FileInfo, err error) error {
 			if info == nil {
 				return err
@@ -100,7 +100,7 @@ func main() {
 			if !info.IsDir() {
 				return nil
 			}
-			fsw.Add(path, fsnotify.All)
+			fsw.Add(path, fswatcher.All)
 			return nil
 		})
 

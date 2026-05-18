@@ -1,8 +1,14 @@
-github.com/gofsnotify/fsnotify v0.0.2 h1:F2WDE3ZshjuNXBe+EXswCn9ue8seMZNiAmJ5SmqoeWI=
-github.com/gofsnotify/fsnotify v0.0.2/go.mod h1:CIQsu068LxiEIHQK1EUuCic0r7vqxRxzxBqUqkOyVQg=
+github.com/ebitengine/purego v0.10.0 h1:QIw4xfpWT6GWTzaW5XEKy3HXoqrJGx1ijYHzTF0/ISU=
+github.com/ebitengine/purego v0.10.0/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
+github.com/fswatcher/fswatcher v0.1.0 h1:g1Y+SP6+I7Omc8ZiGkfd2WPB3RpaWqASYbK9NdfajTc=
+github.com/fswatcher/fswatcher v0.1.0/go.mod h1:uH4fRb/O2zZUuqbGVktogTQM5RD7mGEMArGyVU6DMxo=
 github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/omeid/livereload v0.0.0-20180903043807-18d58b752b26 h1:UgrpxortNaAijXWp2dVezOb/2lVNtGlaI/y6SAosQds=
 github.com/omeid/livereload v0.0.0-20180903043807-18d58b752b26/go.mod h1:zwZKGxj+J+XPXOcKyE1ByX0oRLb+iWZwy4wO7W9LHTM=
 github.com/russross/blackfriday/v2 v2.1.0 h1:JIOH55/0cWyOuilr9/qlrm0BSXldqnqwMsf35Ld67mk=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
+golang.org/x/sys v0.44.0 h1:ildZl3J4uzeKP07r2F++Op7E9B29JRUy+a27EibtBTQ=
+golang.org/x/sys v0.44.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=
+golang.org/x/text v0.37.0 h1:Cqjiwd9eSg8e0QAkyCaQTNHFIIzWtidPahFWR83rTrc=
+golang.org/x/text v0.37.0/go.mod h1:a5sjxXGs9hsn/AJVwuElvCAo9v8QYLzvavO5z2PiM38=
