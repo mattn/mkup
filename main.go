@@ -151,7 +151,13 @@ func main() {
 			fs.ServeHTTP(w, r)
 			return
 		}
-		b, err := os.ReadFile(filepath.Join(cwd, name))
+		cleanCwd := filepath.Clean(cwd)
+		fullPath := filepath.Join(cleanCwd, filepath.Clean("/"+name))
+		if fullPath != cleanCwd && !strings.HasPrefix(fullPath, cleanCwd+string(os.PathSeparator)) {
+			http.Error(w, "403 Forbidden", 403)
+			return
+		}
+		b, err := os.ReadFile(fullPath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				http.Error(w, "404 page not found", 404)
