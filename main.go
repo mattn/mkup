@@ -80,13 +80,8 @@ func useLiveReloadPort(lrs *livereload.Server) string {
 var local embed.FS
 
 func useHttpPort(lrs *livereload.Server) string {
-	http.Handle("/_assets/livereload.js", http.FileServerFS(local))
-	http.Handle("/livereload",
-		http.HandlerFunc(
-			func(w http.ResponseWriter, r *http.Request) {
-				lrs.ServeHTTP(w, r)
-			}))
-	return "location.host + location.pathname + '/../_assets/livereload.js?snipver=1'"
+	http.Handle("/livereload", lrs)
+	return "location.host + '/_assets/livereload.js?snipver=1'"
 }
 
 func main() {
@@ -96,7 +91,7 @@ func main() {
 
 	lrs := livereload.New("mkup")
 	defer lrs.Close()
-	lrjsPath := "/livereload.js"
+	var lrjsPath string
 	if *usehttpport {
 		lrjsPath = useHttpPort(lrs)
 	} else {
