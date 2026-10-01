@@ -4,7 +4,6 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"mime"
 	"net/http"
@@ -37,10 +36,9 @@ const (
 <link rel="stylesheet" href="/_assets/github-dark.css" media="all">
 <script src="/_assets/highlight.min.js"></script>
 <script>hljs.highlightAll();</script>
-<script>document.write('<script src="http://'
-    + (location.host || 'localhost').split(':')[0]
-    + ':35729/livereload.js?snipver=1"></'
-    + 'script>')</script>
+<script>document.write('<script src="'
+	+ location.protocol + '//'
+	+ %s + '"\>\</script\>')</script>
 </head>
 <body>
 <div class="markdown-body">%s</div>
@@ -56,20 +54,11 @@ const (
 )
 
 var (
-	addr = flag.String("http", ":8000", "HTTP service address (e.g., ':8000')")
+	addr        = flag.String("http", ":8000", "HTTP service address (e.g., ':8000')")
+	usehttpport = flag.Bool("usehttpport", false, "serve LiveReload on the same port as HTTP")
 )
 
-//go:embed _assets
-var local embed.FS
-
-func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-	flag.Parse()
-	cwd, _ := os.Getwd()
-
-	lrs := livereload.New("mkup")
-	defer lrs.Close()
-
+func useLiveReloadPort(lrs *livereload.Server) string {
 	go func() {
 		mux := http.NewServeMux()
 		mux.HandleFunc("/livereload.js", func(w http.ResponseWriter, r *http.Request) {
@@ -80,11 +69,34 @@ func main() {
 			}
 			w.Header().Set("Content-Type", "application/javascript")
 			w.Write(b)
-			return
 		})
 		mux.Handle("/", lrs)
 		log.Fatal(http.ListenAndServe(":35729", mux))
 	}()
+	return "(location.hostname || 'localhost') + ':35729/livereload.js?snipver=1'"
+}
+
+//go:embed _assets
+var local embed.FS
+
+func useHttpPort(lrs *livereload.Server) string {
+	http.Handle("/livereload", lrs)
+	return "location.host + '/_assets/livereload.js?snipver=1'"
+}
+
+func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	flag.Parse()
+	cwd, _ := os.Getwd()
+
+	lrs := livereload.New("mkup")
+	defer lrs.Close()
+	var lrjsPath string
+	if *usehttpport {
+		lrjsPath = useHttpPort(lrs)
+	} else {
+		lrjsPath = useLiveReloadPort(lrs)
+	}
 
 	fsw, err := fswatcher.NewWatcher()
 	if err != nil {
@@ -139,7 +151,7 @@ func main() {
 			fs.ServeHTTP(w, r)
 			return
 		}
-		b, err := ioutil.ReadFile(filepath.Join(cwd, name))
+		b, err := os.ReadFile(filepath.Join(cwd, name))
 		if err != nil {
 			if os.IsNotExist(err) {
 				http.Error(w, "404 page not found", 404)
@@ -155,7 +167,7 @@ func main() {
 			blackfriday.WithRenderer(renderer),
 			blackfriday.WithExtensions(extensions),
 		)
-		w.Write([]byte(fmt.Sprintf(template, name, string(b))))
+		w.Write(fmt.Appendf(nil, template, name, lrjsPath, string(b)))
 	})
 
 	server := &http.Server{
