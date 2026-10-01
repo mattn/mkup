@@ -8,6 +8,7 @@ import (
 	"mime"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -88,6 +89,11 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	flag.Parse()
 	cwd, _ := os.Getwd()
+	root, err := os.OpenRoot(cwd)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer root.Close()
 
 	lrs := livereload.New("mkup")
 	defer lrs.Close()
@@ -151,13 +157,7 @@ func main() {
 			fs.ServeHTTP(w, r)
 			return
 		}
-		cleanCwd := filepath.Clean(cwd)
-		fullPath := filepath.Join(cleanCwd, filepath.Clean("/"+name))
-		if fullPath != cleanCwd && !strings.HasPrefix(fullPath, cleanCwd+string(os.PathSeparator)) {
-			http.Error(w, "403 Forbidden", 403)
-			return
-		}
-		b, err := os.ReadFile(fullPath)
+		b, err := root.ReadFile(path.Clean("/" + name)[1:])
 		if err != nil {
 			if os.IsNotExist(err) {
 				http.Error(w, "404 page not found", 404)
